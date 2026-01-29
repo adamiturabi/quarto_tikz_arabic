@@ -200,7 +200,7 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
   if conf.svg_engine ~= false then
     if is_python_script(conf.svg_engine) then
       utility_to_run = 'python3'
-      script_path = pandoc.path.join{pandoc.system.get_working_directory(), 'pdf2svg.py'}
+      script_path = pandoc.path.join{pandoc.system.get_working_directory(), conf.svg_engine}
     end
     if not check_dependency(utility_to_run) then
       error(utility_to_run .. " not found. Please install it to convert PDFs to SVG.")
