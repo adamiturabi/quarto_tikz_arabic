@@ -1,0 +1,26 @@
+project:
+  output-dir: docs
+
+book:
+  #subtitle: "An online book for learning Arabic"
+  #appendices:
+  #  - content/hamzah_rules.qmd
+  #  - content/gloss_terms.qmd
+  #  - content/usage_and_style.qmd
+  #  - content/chapter_notes.qmd
+  description: |
+    An online textbook for learning Arabic
+
+format:
+  html:
+    mainfont: "CharisW"
+    mainfontoptions: Numbers=OldStyle
+    sansfont: "CharisW"
+    monofont: "DejaVu Sans Mono" # set size in CSS using class "sourceCode"
+    #fontsize: 10pt
+    theme: cosmo
+    css: styles.css
+ 
+tikz:
+  svg-engine: pdf2svg.py
+  scale: 1.28
