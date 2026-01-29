@@ -222,18 +222,6 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
       local dvi_file = base_filename .. ".dvi"
 
       -- Build the LaTeX document
---      local tikz_template = pandoc.template.compile [[
---\documentclass[tikz]{standalone}
---% \usepackage{tikz} % already loaded by the documentclass
---$additional-packages$
---$for(header-includes)$
---$it$
---$endfor$
---\begin{document}
---$body$
---\end{document}
---      ]]
-
       local default_template_str = [[
 \documentclass[tikz]{standalone}
 % \usepackage{tikz} % already loaded by the documentclass
@@ -271,7 +259,6 @@ $body$
       local latex_args = {} -- '-interaction=nonstopmode' }
       if conf.svg_engine == 'dvisvgm' then
         table.insert(latex_args, '--output-format=dvi')
-        --output-format=dvi
       end
       table.insert(latex_args, tikz_file)
       local success, latex_result = pcall(
