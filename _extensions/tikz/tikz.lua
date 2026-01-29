@@ -30,7 +30,9 @@ local function write_file (filepath, content)
   fh:close()
   return true
 end
-
+local function is_python_script(filename)
+  return  string.sub(filename, -3) == '.py'
+end
 -- Function to check if a command exists
 local function check_dependency(cmd)
   local handle = io.popen("command -v " .. cmd .. " 2>/dev/null")
@@ -179,14 +181,14 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
     error("lualatex not found. Please install LaTeX to compile TikZ diagrams.")
   end
   script_path = nil
+  utility_to_run = conf.svg_engine
   if conf.svg_engine ~= false then
-    utility_to_check = conf.svg_engine
-    if conf.svg_engine == 'mupdf' then
-      utility_to_check = 'python3'
+    if is_python_script(conf.svg_engine) then
+      utility_to_run = 'python3'
       script_path = pandoc.path.join{pandoc.system.get_working_directory(), 'pdf2svg.py'}
     end
-    if not check_dependency(utility_to_check) then
-      error(utility_to_check .. " not found. Please install it to convert PDFs to SVG.")
+    if not check_dependency(utility_to_run) then
+      error(utility_to_run .. " not found. Please install it to convert PDFs to SVG.")
     end
   end
   template_str = nil
@@ -296,7 +298,6 @@ $body$
             '-o ' .. svg_file
           }
         elseif conf.svg_engine == 'mupdf' then
-          conf.svg_engine = 'python3'
           args = {
             script_path,
             pdf_file,
@@ -304,7 +305,7 @@ $body$
           }
         end
 
-        local success_svg, svg_result = pcall(pandoc.pipe, conf.svg_engine, args, '')
+        local success_svg, svg_result = pcall(pandoc.pipe, utility_to_run, args, '')
         if not success_svg then
           error("Error converting PDF to SVG for TikZ figure '" .. base_filename .. "':\n" ..
             tostring(svg_result) .. "\nTikZ Code:\n" .. code)
