@@ -178,8 +178,11 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
   if not check_dependency('lualatex') then
     error("lualatex not found. Please install LaTeX to compile TikZ diagrams.")
   end
-  if not check_dependency('inkscape') then
-    error("Inkscape not found. Please install Inkscape to convert PDFs to SVG.")
+  print(conf.svg_engine)
+  if conf.svg_engine ~= false then
+    if not check_dependency(conf.svg_engine) then
+      error(conf.svg_engine .. " not found. Please install it to convert PDFs to SVG.")
+    end
   end
   template_str = nil
   if conf['template'] ~= "default" then
@@ -194,6 +197,7 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
       local tikz_file = base_filename .. ".tex"
       local pdf_file = base_filename .. ".pdf"
       local svg_file = base_filename .. ".svg"
+      local dvi_file = base_filename .. ".dvi"
 
       -- Build the LaTeX document
 --      local tikz_template = pandoc.template.compile [[
@@ -219,7 +223,6 @@ $endfor$
 $body$
 \end{document}
       ]]
-      print(template_str)
       if template_str == nil then
         template_str = default_template_str
       end
@@ -243,12 +246,22 @@ $body$
       write_file(tikz_file, tex_code)
 
       -- Execute the LaTeX compiler:
+      local latex_args = {} -- '-interaction=nonstopmode' }
+      if conf.svg_engine == 'dvisvgm' then
+        table.insert(latex_args, '--output-format=dvi')
+        --output-format=dvi
+      end
+      table.insert(latex_args, tikz_file)
+      for k,v in pairs(latex_args) do
+          print(k.." = "..v)
+      end
       local success, latex_result = pcall(
         pandoc.pipe,
         'lualatex',
-        { '-interaction=nonstopmode', tikz_file },
+        latex_args,
         ''
       )
+      print(dvi_file)
       if not success then
         local log_file = base_filename .. ".log"
         local log_content = read_file(log_file) or ""
@@ -257,28 +270,50 @@ $body$
           "\nTikZ Code:\n" .. code)
       end
 
-      -- Convert PDF to SVG using Inkscape
-      local args = {
-        '--pages=1',
-        '--export-area-drawing',
-        '--export-type=svg',
-        '--export-plain-svg',
-        '--export-margin=0',
-        '--export-filename=' .. svg_file,
-        pdf_file
-      }
-      local success_inkscape, inkscape_result = pcall(pandoc.pipe, 'inkscape', args, '')
-      if not success_inkscape then
-        error("Error converting PDF to SVG for TikZ figure '" .. base_filename .. "':\n" ..
-          tostring(inkscape_result) .. "\nTikZ Code:\n" .. code)
-      end
+      if conf.svg_engine == false then
+        -- is PDF output, no need to convert to SVG
 
-      -- Read the SVG file
-      local imgdata = read_file(svg_file)
-      if not imgdata then
-        error("Failed to read generated SVG file for TikZ figure '" .. base_filename .. "'.\nTikZ Code:\n" .. code)
+      else
+        local args = {}
+        if conf.svg_engine == 'inkscape' then
+        -- Convert PDF to SVG using Inkscape
+          args = {
+            '--pages=1',
+            '--export-area-drawing',
+            '--export-type=svg',
+            '--export-plain-svg',
+            '--export-margin=0',
+            '--export-filename=' .. svg_file,
+            pdf_file
+          }
+        elseif conf.svg_engine == 'dvisvgm' then
+          print(conf.libgs)
+          args = {
+            conf.libgs,
+            '--font-format=woff',
+            '--scale=' .. conf.scale,
+            dvi_file,
+            '-o ' .. svg_file
+          }
+
+          for k,v in pairs(args) do
+              print(k.." = "..v)
+          end
+        end
+
+        local success_svg, svg_result = pcall(pandoc.pipe, conf.svg_engine, args, '')
+        if not success_svg then
+          error("Error converting PDF to SVG for TikZ figure '" .. base_filename .. "':\n" ..
+            tostring(svg_result) .. "\nTikZ Code:\n" .. code)
+        end
+
+        -- Read the SVG file
+        local imgdata = read_file(svg_file)
+        if not imgdata then
+          error("Failed to read generated SVG file for TikZ figure '" .. base_filename .. "'.\nTikZ Code:\n" .. code)
+        end
+        return imgdata, 'image/svg+xml'
       end
-      return imgdata, 'image/svg+xml'
     end)
   end
 
@@ -394,8 +429,21 @@ local function configure (meta, format_name)
     end
   end
   local template = conf['template']
-  if tex_dir then
+  if template ~= nil then
     template = pandoc.utils.stringify(template)
+  end
+  --local use_dvisvgm = conf['use-dvisvgm'] or false
+  local svg_engine = conf['svg-engine'] or false
+  if svg_engine then
+    svg_engine = pandoc.utils.stringify(svg_engine)
+  end
+  local libgs = conf['libgs'] or false
+  if libgs then
+    libgs = pandoc.utils.stringify(libgs)
+  end
+  local scale = conf['scale'] or '1'
+  if scale then
+    scale = pandoc.utils.stringify(scale)
   end
 
   return {
@@ -404,6 +452,9 @@ local function configure (meta, format_name)
     save_tex = save_tex,
     tex_dir = tex_dir,
     template = template,
+    svg_engine = svg_engine,
+    scale = scale,
+    libgs = libgs,
   }
 end
 
