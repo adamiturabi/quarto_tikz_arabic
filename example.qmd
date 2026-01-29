@@ -8,9 +8,43 @@ tikz:
   cache: false
   save-tex: true  # Enable saving intermediate .tex files
   tex-dir: tikz-tex  # Optional: Specify directory to save .tex files
+  template: template_tikz_html.tex
 ---
 
 # Simple TikZ Diagram
+
+```{.tikz}
+%%| filename: myarb
+
+\usetikzlibrary{matrix}
+\usetikzlibrary{decorations.text, decorations.pathreplacing}
+\begin{tikzpicture}[nodes={text depth=0.25ex,text height=1.25ex}]
+\path [decoration={text effects along path, 
+  text=.\foreignlanguage{arabic}{\quranfamily ب} \foreignlanguage{arabic}{\quranfamily ب} \foreignlanguage{arabic}{\quranfamily ب},
+  text effects/.cd, 
+    path from text, text along path,
+    group letters, word count=\w,
+    every word/.style={name=word-\w, execute at begin node=\strut}},
+  decorate] (0,0);
+
+\draw [decoration={brace}, decorate] 
+   (word-1.north west) -- (word-1.north east)
+      node [midway, rotate=90, anchor=south, right=0ex] {\scriptsize attribute};
+
+\draw [decoration={brace}, decorate] 
+   (word-2.north west) -- (word-2.north east)
+      node [midway, rotate=90, anchor=south, right=0ex] {\scriptsize attributee};
+
+\draw [decoration={brace, mirror}, decorate] 
+   (word-1.south west) -- (word-2.south east)
+      node [midway, below] {\scriptsize descriptive noun-phrase};
+
+\path (0,0) node [midway, below=7.5ex, right=0ex, align=left] {``I read the small books.'')};
+
+\end{tikzpicture}
+```
+
+
 
 Here is a simple TikZ diagram without additional packages or complex features:
 
@@ -43,6 +77,7 @@ Now, let's look at a more complex example [@fig-example] that uses additional pa
 %%|   id: fig-my-fancy-diagram
 %%|   class: my-class
 %%| additionalPackages: \usepackage{adjustbox}
+
 
 \usetikzlibrary{arrows, arrows.meta}
 \tikzset{

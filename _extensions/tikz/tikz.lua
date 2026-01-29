@@ -175,11 +175,15 @@ end
 -- Function to compile TikZ code to SVG
 local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added conf and basename parameters
   -- Ensure required dependencies are available
-  if not check_dependency('pdflatex') then
-    error("pdflatex not found. Please install LaTeX to compile TikZ diagrams.")
+  if not check_dependency('lualatex') then
+    error("lualatex not found. Please install LaTeX to compile TikZ diagrams.")
   end
   if not check_dependency('inkscape') then
     error("Inkscape not found. Please install Inkscape to convert PDFs to SVG.")
+  end
+  template_str = nil
+  if conf['template'] ~= "default" then
+    template_str = read_file(conf['template'])
   end
 
   local function process_in_dir(dir)
@@ -192,7 +196,19 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
       local svg_file = base_filename .. ".svg"
 
       -- Build the LaTeX document
-      local tikz_template = pandoc.template.compile [[
+--      local tikz_template = pandoc.template.compile [[
+--\documentclass[tikz]{standalone}
+--% \usepackage{tikz} % already loaded by the documentclass
+--$additional-packages$
+--$for(header-includes)$
+--$it$
+--$endfor$
+--\begin{document}
+--$body$
+--\end{document}
+--      ]]
+
+      local default_template_str = [[
 \documentclass[tikz]{standalone}
 % \usepackage{tikz} % already loaded by the documentclass
 $additional-packages$
@@ -203,6 +219,12 @@ $endfor$
 $body$
 \end{document}
       ]]
+      print(template_str)
+      if template_str == nil then
+        template_str = default_template_str
+      end
+
+      local tikz_template = pandoc.template.compile(template_str)
       local meta = {
         ['header-includes'] = { pandoc.RawInline(
           'latex',
@@ -223,7 +245,7 @@ $body$
       -- Execute the LaTeX compiler:
       local success, latex_result = pcall(
         pandoc.pipe,
-        'pdflatex',
+        'lualatex',
         { '-interaction=nonstopmode', tikz_file },
         ''
       )
@@ -371,12 +393,17 @@ local function configure (meta, format_name)
       pandoc.system.make_directory(tex_dir, true)
     end
   end
+  local template = conf['template']
+  if tex_dir then
+    template = pandoc.utils.stringify(template)
+  end
 
   return {
     cache = image_cache and true,
     image_cache = image_cache,
     save_tex = save_tex,
     tex_dir = tex_dir,
+    template = template,
   }
 end
 
