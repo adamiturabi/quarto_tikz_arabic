@@ -313,7 +313,7 @@ $body$
             dvi_file,
             '-o ' .. svg_file
           }
-        elseif conf.svg_engine == 'mupdf' then
+        elseif is_python_script(conf.svg_engine) then
           args = {
             script_path,
             pdf_file,
