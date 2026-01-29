@@ -18,5 +18,6 @@ format:
     monofontoptions: "Scale=0.7"
     fontsize: 10pt
 
-
+tikz:
+  template: template_tikz_pdf.tex
 

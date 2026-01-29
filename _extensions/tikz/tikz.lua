@@ -318,6 +318,7 @@ $body$
             script_path,
             pdf_file,
             svg_file,
+            conf.scale,
           }
         end
 
