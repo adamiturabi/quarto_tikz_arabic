@@ -9,6 +9,9 @@ tikz:
   save-tex: true  # Enable saving intermediate .tex files
   tex-dir: tikz-tex  # Optional: Specify directory to save .tex files
   template: template_tikz_html.tex
+  svg-engine: mupdf
+  scale: 1.28
+  #libgs: /usr/local/Cellar/ghostscript/10.05.1/lib/libgs.dylib
 ---
 
 # Simple TikZ Diagram
@@ -20,7 +23,7 @@ tikz:
 \usetikzlibrary{decorations.text, decorations.pathreplacing}
 \begin{tikzpicture}[nodes={text depth=0.25ex,text height=1.25ex}]
 \path [decoration={text effects along path, 
-  text=.\foreignlanguage{arabic}{\quranfamily ب} \foreignlanguage{arabic}{\quranfamily ب} \foreignlanguage{arabic}{\quranfamily ب},
+  text=.\txarb{ٱلصَّغِيرَينِ} \txarb{ٱلْكِتَابَيْنِ} \txarb{قَرَأْتُ},
   text effects/.cd, 
     path from text, text along path,
     group letters, word count=\w,

@@ -178,10 +178,15 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
   if not check_dependency('lualatex') then
     error("lualatex not found. Please install LaTeX to compile TikZ diagrams.")
   end
-  print(conf.svg_engine)
+  script_path = nil
   if conf.svg_engine ~= false then
-    if not check_dependency(conf.svg_engine) then
-      error(conf.svg_engine .. " not found. Please install it to convert PDFs to SVG.")
+    utility_to_check = conf.svg_engine
+    if conf.svg_engine == 'mupdf' then
+      utility_to_check = 'python3'
+      script_path = pandoc.path.join{pandoc.system.get_working_directory(), 'pdf2svg.py'}
+    end
+    if not check_dependency(utility_to_check) then
+      error(utility_to_check .. " not found. Please install it to convert PDFs to SVG.")
     end
   end
   template_str = nil
@@ -252,16 +257,12 @@ $body$
         --output-format=dvi
       end
       table.insert(latex_args, tikz_file)
-      for k,v in pairs(latex_args) do
-          print(k.." = "..v)
-      end
       local success, latex_result = pcall(
         pandoc.pipe,
         'lualatex',
         latex_args,
         ''
       )
-      print(dvi_file)
       if not success then
         local log_file = base_filename .. ".log"
         local log_content = read_file(log_file) or ""
@@ -287,7 +288,6 @@ $body$
             pdf_file
           }
         elseif conf.svg_engine == 'dvisvgm' then
-          print(conf.libgs)
           args = {
             conf.libgs,
             '--font-format=woff',
@@ -295,10 +295,13 @@ $body$
             dvi_file,
             '-o ' .. svg_file
           }
-
-          for k,v in pairs(args) do
-              print(k.." = "..v)
-          end
+        elseif conf.svg_engine == 'mupdf' then
+          conf.svg_engine = 'python3'
+          args = {
+            script_path,
+            pdf_file,
+            svg_file,
+          }
         end
 
         local success_svg, svg_result = pcall(pandoc.pipe, conf.svg_engine, args, '')
