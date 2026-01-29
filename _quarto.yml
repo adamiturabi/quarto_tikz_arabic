@@ -13,8 +13,8 @@ book:
   chapters:
     - index.qmd
     - example.qmd
+  downloads: [pdf]
 
-title: "TikZ Example"
 filters:
   - tikz
 

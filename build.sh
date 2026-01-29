@@ -4,3 +4,5 @@
 #rm -rf tikz-tex
 quarto render --profile makepdf
 quarto render --profile makehtml
+cp pdf_out_dir/TikZ-Example.pdf docs/
+
