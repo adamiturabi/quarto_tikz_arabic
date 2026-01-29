@@ -7,11 +7,12 @@ profile:
   default: makehtml
 
 book:
-  title: "A Grammar of Standard Classical Arabic"
+  title: "TikZ Example"
   author: "The Authors"
   date: now
   chapters:
     - index.qmd
+    - example.qmd
 
 title: "TikZ Example"
 filters:
@@ -21,8 +22,4 @@ tikz:
   cache: false
   save-tex: true  # Enable saving intermediate .tex files
   tex-dir: tikz-tex  # Optional: Specify directory to save .tex files
-  #template: template_tikz_html.tex
-  #svg-engine: pdf2svg.py
-  #scale: 1.28
-  #libgs: /usr/local/Cellar/ghostscript/10.05.1/lib/libgs.dylib
 

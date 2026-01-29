@@ -1,19 +1,9 @@
 project:
   output-dir: docs
 
-book:
-  description: |
-    An online textbook
-
 format:
   html:
-    mainfont: "CharisW"
-    mainfontoptions: Numbers=OldStyle
-    sansfont: "CharisW"
-    monofont: "DejaVu Sans Mono" # set size in CSS using class "sourceCode"
-    #fontsize: 10pt
     theme: cosmo
-    css: styles.css
  
 tikz:
   template: template_tikz_html.tex

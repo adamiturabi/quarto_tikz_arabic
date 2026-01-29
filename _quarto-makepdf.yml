@@ -4,19 +4,8 @@ project:
 format:
   pdf:
     keep-tex: true
-    documentclass: scrbook # new chapter page only on right but adds \frontmatter command for roman numeral pagination
+    documentclass: scrbook
     toc: true
-    toc-depth: 2
-    toc-title: Contents
-    number-sections: true
-    colorlinks: true
-    mainfont: "Charis"
-    mainfontoptions: Numbers=OldStyle
-    sansfont: "Charis"
-    sansfontoptions: Numbers=OldStyle
-    monofont: "DejaVu Sans Mono"
-    monofontoptions: "Scale=0.7"
-    fontsize: 10pt
 
 tikz:
   template: template_tikz_pdf.tex
